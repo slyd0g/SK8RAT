@@ -1,0 +1,2 @@
+﻿  SK8RAT.cpp
+c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(510): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "pch.h"' to your source?
