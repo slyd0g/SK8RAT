@@ -17,10 +17,13 @@ c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(150): warning C4267: '
 c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(262): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
 c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(372): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
 c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(376): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(78): warning C4477: 'printf' : format string '%i' requires an argument of type 'int', but variadic argument 1 has type 'unsigned __int64'
+  c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(78): note: consider using '%zi' in the format string
 c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(206): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   Generating code
-  2 of 1167 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+c:\users\john\source\repos\sk8rat\sk8rat\agent.h(48): warning C4715: 'get_internalip': not all control paths return a value
+  731 of 809 functions (90.4%) were compiled, the rest were copied from previous compilation.
+    2 functions were new in current compilation
+    6 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SK8RAT.vcxproj -> C:\Users\John\source\repos\SK8RAT\x64\Release\SK8RAT.exe
