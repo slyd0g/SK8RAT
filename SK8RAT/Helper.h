@@ -5,11 +5,6 @@
 #include <sstream>
 #include <random>
 
-
-
-
-
-
 // Attempt to enable a specific SE Privilege (taken from throwback)
 static DWORD EnablePrivilege(LPCTSTR name, HANDLE &hToken) {
 	LUID luid;

@@ -12449,6 +12449,7 @@ namespace nlohmann
 						{
 							std::string sn(3, '\0');
 							(std::snprintf)(&sn[0], sn.size(), "%.2X", byte);
+
 							JSON_THROW(type_error::create(316, "invalid UTF-8 byte at index " + std::to_string(i) + ": 0x" + sn));
 						}
 
