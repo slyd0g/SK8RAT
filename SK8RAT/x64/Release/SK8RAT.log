@@ -9,16 +9,16 @@ c:\users\john\source\repos\sk8rat\sk8rat\agent.h(525): warning C4552: '+': resul
 c:\users\john\source\repos\sk8rat\sk8rat\agent.h(538): warning C4552: '+': result of expression not used
 c:\users\john\source\repos\sk8rat\sk8rat\agent.h(591): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
 c:\users\john\source\repos\sk8rat\sk8rat\agent.h(605): warning C4101: 'dwWritten2': unreferenced local variable
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(150): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(262): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(372): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(376): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(206): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(278): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\sk8rat.cpp(507): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(171): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(283): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(393): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(397): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(656): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(728): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(957): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   Generating code
-  3 of 1606 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  19 of 1608 functions ( 1.2%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    16 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SK8RAT.vcxproj -> C:\Users\John\source\repos\SK8RAT\x64\Release\SK8RAT.exe
