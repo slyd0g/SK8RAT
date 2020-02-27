@@ -1,5 +1,5 @@
 # SK8RAT
-C++ implant that interfaces with SK8PARK
+C++ implant that interfaces with [SK8PARK](https://github.com/slyd0g/SK8PARK)
 
 Video showing listener creation, implant sleep/jitter manipulation, and tasking:
 
