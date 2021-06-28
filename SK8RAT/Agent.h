@@ -368,7 +368,7 @@ std::string shell_exec(std::string user_input)
 	std::string return_string = "no output";
 	std::string file = user_input.substr(0, user_input.find(' '));
 	std::string parameter = "";
-	if ((user_input.find(" ") != std::string::npos)) //Check for additional parameters
+	if ((user_input.find(' ') != std::string::npos)) //Check for additional parameters
 	{
 		parameter = user_input.substr(user_input.find(' '), std::string::npos);
 	}
@@ -494,7 +494,7 @@ std::string create_process_exec(std::string user_input)
 	}
 	
 	// Remove input string that is echo'd by cmd.exe
-	return (return_string.substr(return_string.find("\n") + 1));
+	return (return_string.substr(return_string.find('\n') + 1));
 }
 
 DWORD WINAPI create_process_exec_thread(__in LPVOID lpParameter)
