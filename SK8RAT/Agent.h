@@ -400,7 +400,7 @@ std::string create_process_exec(std::string user_input)
 	BOOL CreatePipeOut = CreatePipe(&hReadPipe_Out, &hWritePipe_Out, &saAttr, buffersize);
 	if (CreatePipeOut == NULL)
 	{
-		return_string = "CreatePipe() fail! System Error: " + GetLastError(); +"\n";
+		return_string = "CreatePipe() fail! System Error: " + std::to_string(GetLastError()) +"\n";
 		return return_string;
 	}
 
@@ -413,7 +413,7 @@ std::string create_process_exec(std::string user_input)
 	BOOL CreatePipeIn = CreatePipe(&hReadPipe_In, &hWritePipe_In, &saAttr, buffersize);
 	if (CreatePipeIn == NULL)
 	{
-		return_string = "CreatePipe() fail! System Error: " + GetLastError(); +"\n";
+		return_string = "CreatePipe() fail! System Error: " + std::to_string(GetLastError()) +"\n";
 		return return_string;
 	}
 
